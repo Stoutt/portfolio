@@ -1,0 +1,6 @@
+<!ELEMENT game (board)>
+        <!ATTLIST game turn (1|2)>
+        <!ATTLIST game state (p1turn | p2turn | p1won | p2won)>
+        <!ELEMENT board (row*)>
+        <!ELEMENT row (col*)>
+        <!ELEMENT col (#PCDATA)>

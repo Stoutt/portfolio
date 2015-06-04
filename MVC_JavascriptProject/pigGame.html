@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Pig Dice!</title>
+    <style type="text/css">
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        #GameScreen {
+            display: none;
+        }
+        #WinScreen {
+            display: none;
+        }
+        #StartScreen {
+            display: block;
+        }
+        #dice {
+
+            width: 100px;
+            height: 100px;
+        }
+        #dice1 {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    <script type="text/javascript" src="Die.js"></script>
+    <script type="text/javascript" src="Player.js"></script>
+    <script type="text/javascript" src="PigGame.js"></script>
+</head>
+<body>
+<h1>Pig Dice!</h1>
+
+<div id="StartScreen">
+    <FIELDSET>
+        <LEGEND>Options:</LEGEND>
+        <form>
+            Score to win: <input type="number" name="wincon" id="wincon" min="0" value="100"><BR>
+            Player1: <input type="text" name="player1" id="player1"><BR>
+            Player2: <input type="text" name="player2" id="player2"><BR>
+            Player3: <input type="text" name="player3" id="player3"><BR>
+            Player4: <input type="text" name="player4" id="player4"><BR><BR>
+            <input type="button" name="start" value="Start" onclick="startGame();">
+        </form>
+    </FIELDSET>
+
+
+</div>
+<div id="GameScreen">
+<TABLE>
+    <TR id="top"><TH>Players</TH><TH>Score</TH></TR>
+</TABLE>
+    <BR>
+    <span class="playerTurn"></span>'s turn.<BR>
+    Turn Total: <span class="turnTotal"></span>
+    <BR><BR>
+    <img src="Dice1.png" id="dice">
+    <form>
+        <input type="button" name="rollB" value="Roll" onclick="roll();">
+        <input type="button" name="holdB" value="Hold" onclick="hold();">
+        <input type="button" name="quitB" value="Quit" onclick="quit();">
+    </form>
+</div>
+<div id="WinScreen">
+    <span class="winner">Someone</span> won!
+    <form>
+        <input type="button" name="newGame" value="New Game" onclick="quit();">
+    </form>
+</div>
+<script type="text/javascript">
+
+    var game = PigGame.init();
+
+    function startGame() {
+        var player1name = document.getElementById("player1").value;
+        var player2name = document.getElementById("player2").value;
+        var player3name = document.getElementById("player3").value;
+        var player4name = document.getElementById("player4").value;
+        if(game.makePlayers(player1name,player2name,player3name,player4name)) {
+            game.setWinCondition(document.getElementById("wincon").value);
+            updatePlayer();
+            updateScores();
+            document.getElementById("StartScreen").style.display = "none";
+            document.getElementById("GameScreen").style.display = "block";
+            console.log("Starting Game!!!!");
+        }
+        else {
+            //TODO Error messages
+            console.log("ERROR: Need at least 2 players.");
+        }
+    }
+
+    function roll(){
+        var myRoll = game.roll();
+        if(myRoll == 0){
+            var playerName = document.getElementById("WinScreen").getElementsByClassName("winner");
+            var i;
+            for(i = 0; i < playerName.length;i++){
+                playerName.item(i).innerHTML = game.getCurrentPlayerName();
+            }
+            document.getElementById("GameScreen").style.display = "none";
+            document.getElementById("StartScreen").style.display = "none";
+            document.getElementById("WinScreen").style.display = "block";
+            console.log("YOU WIN!");
+        }
+        else {
+            document.getElementById("dice").setAttribute("src", "Dice" + myRoll + ".png");
+            updatePlayer();
+        }
+    }
+
+    function hold(){
+       if(game.hold()){
+            //Successfully held
+            updateScores();
+            updatePlayer();
+        }
+        else {
+            //TODO Error message for roll or disable button?
+            console.log("ERROR: cant hold without rolling!");
+        }
+    }
+
+    function updateScores(){
+        // update the table with names and scores
+        // make only active players show up
+        var players = game.getPlayers();
+        var trNodes = document.getElementById("GameScreen").getElementsByTagName("tr");
+        var tableBNode = document.getElementById("GameScreen").getElementsByTagName("tbody");
+        //console.log(tableBNode.item(0).childNodes);
+        var i;
+        //console.log("len: " + tableBNode.item(0).childNodes.length);
+        for(i = 1; i < trNodes.length; i++){
+            var tdNodes = trNodes[i].childNodes;
+
+            if(i-1 < players.length){
+                tdNodes[0].textContent = players[i-1].getName();
+                tdNodes[1].textContent = players[i-1].getScore();
+            }
+            else {
+                tableBNode.item(0).removeChild(trNodes.item(i));
+            }
+        }
+        for(var p = i-1; p < players.length; p++){ //fill in missing
+            var tr = document.createElement("tr");
+            var td1 = document.createElement("td");
+            var td2 = document.createElement("td");
+            var node1 = document.createTextNode(players[p].getName());
+            var node2 = document.createTextNode(players[p].getScore());
+            td1.appendChild(node1);
+            td2.appendChild(node2);
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tableBNode.item(0).appendChild(tr);
+        }
+    }
+
+    function updatePlayer(){
+        var playerName = document.getElementById("GameScreen").getElementsByClassName("playerTurn");
+        var i;
+        for(i = 0; i < playerName.length;i++){
+            playerName.item(i).innerHTML = game.getCurrentPlayerName();
+        }
+
+        var playerTotal = document.getElementById("GameScreen").getElementsByClassName("turnTotal");
+        for(i = 0; i < playerTotal.length;i++){
+            playerTotal.item(i).innerHTML = game.getTurnTotal();
+        }
+    }
+
+    function quit(){
+        document.getElementById("WinScreen").style.display = "none";
+        document.getElementById("GameScreen").style.display = "none";
+        document.getElementById("StartScreen").style.display = "block";
+    }
+
+</script>
+</body>
+</html>

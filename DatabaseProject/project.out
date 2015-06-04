@@ -1,0 +1,1009 @@
+SQL> /*
+SQL> CIS 353 - Database Design Project
+SQL> Brenden Murray
+SQL> Tyler Stout
+SQL> Jared Hayward
+SQL> Steven Miesch
+SQL> */
+SQL> -- CREATING THE TABLES
+SQL> -- -----------------------------------------------------------------
+SQL> CREATE TABLE  Product
+  2  (
+  3  pNum     INTEGER,
+  4  Price    INTEGER	NOT NULL,
+  5  Condition	CHAR(15)     NOT NULL,
+  6  Type     CHAR(15) NOT NULL,
+  7  -- Contraints go here.
+  8  CONSTRAINT pIC1 PRIMARY KEY (pNum),
+  9  CONSTRAINT pIC2 CHECK(Condition IN ('New', 'Used', 'Refurbished'))
+ 10  );
+
+Table created.
+
+SQL> -- ---------------------------------------------------------------
+SQL> CREATE TABLE  Store
+  2  (
+  3  sNum     INTEGER,
+  4  Location	 CHAR(20)   NOT NULL,
+  5  Hours     INTEGER NOT NULL,
+  6  -- Contraints go here.
+  7  CONSTRAINT sIC1 PRIMARY KEY (sNum),
+  8  CONSTRAINT sIC2 CHECK(hours <= 24)
+  9  );
+
+Table created.
+
+SQL> -- ---------------------------------------------------------------
+SQL> CREATE TABLE  Workers
+  2  (
+  3  eNum    INTEGER,
+  4  sNum    INTEGER   NOT NULL,
+  5  Name  CHAR(15)	NOT NULL,
+  6  Age   INTEGER   NOT NULL,
+  7  JobTitle	  CHAR(15) NOT NULL,
+  8  -- Contraints go here.
+  9  CONSTRAINT wIC1 PRIMARY KEY (eNum),
+ 10  CONSTRAINT wIC2 FOREIGN KEY(sNum) REFERENCES Store(sNum) ON DELETE SET NULL,
+ 11  CONSTRAINT wIC3 CHECK(NOT (Age <= 18 AND JobTitle = 'Manager'))
+ 12  );
+
+Table created.
+
+SQL> --
+SQL> ---------------------------------------------------------------
+SQL> 
+SQL> CREATE TABLE  Orders
+  2  (
+  3  OrderNum INTEGER,
+  4  Enum INTEGER NOT NULL,
+  5  oDate DATE NOT NULL,
+  6  SNum     INTEGER NOT NULL,
+  7  Type    CHAR(15)	     NOT NULL,
+  8  Total INTEGER NOT NULL,
+  9  -- Contraints go here.
+ 10  CONSTRAINT oIC1 PRIMARY KEY (OrderNum),
+ 11  CONSTRAINT oIC2 FOREIGN KEY(Enum) REFERENCES Workers(eNum) ON DELETE SET NULL,
+ 12  CONSTRAINT oIC3 FOREIGN KEY(SNum) REFERENCES Store(sNum) ON DELETE SET NULL
+ 13  );
+
+Table created.
+
+SQL> -- ---------------------------------------------------------------
+SQL> 
+SQL> CREATE TABLE  CD
+  2  (
+  3  Title CHAR(40),
+  4  pNum  INTEGER,
+  5  trackNum INTEGER NOT NULL,
+  6  -- Contraints go here.
+  7  CONSTRAINT cIC1 PRIMARY KEY (Title, pNum)
+  8  );
+
+Table created.
+
+SQL> -- ---------------------------------------------------------------
+SQL> CREATE TABLE CD_genre
+  2  (
+  3  Genre CHAR(40),
+  4  Title    CHAR(50),
+  5  -- Contraints go here.
+  6  CONSTRAINT gIC1 PRIMARY KEY (Genre, Title)
+  7  );
+
+Table created.
+
+SQL> --
+SQL> ---------------------------------------------------------------
+SQL> CREATE TABLE CD_artist
+  2  (
+  3  Artist CHAR(40),
+  4  Title    CHAR(50),
+  5  -- Contraints go here.
+  6  CONSTRAINT aIC1 PRIMARY KEY (Artist, Title)
+  7  );
+
+Table created.
+
+SQL> --
+SQL> ---------------------------------------------------------------
+SQL> CREATE TABLE  SellsA
+  2  (
+  3  sNum     INTEGER,
+  4  pNum     INTEGER,
+  5  -- Contraints go here.
+  6  CONSTRAINT saIC1 PRIMARY KEY (sNum, pNum)
+  7  );
+
+Table created.
+
+SQL> --
+SQL> ---------------------------------------------------------------
+SQL> CREATE TABLE  Contains
+  2  (
+  3  pNum    INTEGER,
+  4  oNum    INTEGER,
+  5  Quantity  INTEGER	 NOT NULL,
+  6  -- Contraints go here.
+  7  CONSTRAINT coIC1 PRIMARY KEY (pNum, oNum),
+  8  CONSTRAINT coIC2 CHECK(Quantity <= 5)
+  9  );
+
+Table created.
+
+SQL> --
+SQL> -- ------------------------------------------------------------------
+SQL> -- POPULATING THE DATABASE INSTANCE
+SQL> -- --------------------------------------------------------------------
+SQL> SET FEEDBACK OFF;
+SQL> 
+SQL> INSERT INTO Product VALUES (17652987, 85, 'New', 'Amp');
+SQL> INSERT INTO Product VALUES (86753098, 150, 'New', 'Guitar');
+SQL> INSERT INTO Product VALUES (98766665, 340, 'Used', 'Keyboard');
+SQL> INSERT INTO Product VALUES (88740157, 500, 'Refurbished', 'Guitar');
+SQL> INSERT INTO Product VALUES (88102385, 10, 'New', 'CD');
+SQL> INSERT INTO Product VALUES (55201823, 5, 'Used', 'CD');
+SQL> INSERT INTO Product VALUES (78336924, 18, 'New', 'CD');
+SQL> INSERT INTO Product VALUES (67942066, 6, 'Used', 'CD');
+SQL> INSERT INTO Product VALUES (59623748, 22, 'New', 'Merch');
+SQL> INSERT INTO Product VALUES (18919726, 3, 'New', 'Merch');
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO Store VALUES (46874343, 'Grand Rapids', 12);
+SQL> INSERT INTO Store VALUES (39739739, 'Saint Clair Shores', 10);
+SQL> INSERT INTO Store VALUES (37287273, 'Saint Clair Shores', 10);
+SQL> INSERT INTO Store VALUES (67787987, 'Lansing', 11);
+SQL> 
+SQL> INSERT INTO Store VALUES (12310846, 'Grosse Pointe', 9);
+SQL> INSERT INTO Store VALUES (32133466, 'Saint Clair Shores', 2);
+SQL> INSERT INTO Store VALUES (40775460, 'Grand Rapids', 8);
+SQL> INSERT INTO Store VALUES (72727500, 'Detroit', 12);
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO Workers VALUES (10234190, 46874343,'Bob',30,'Janitor');
+SQL> INSERT INTO Workers VALUES (18923719, 39739739, 'Mary', 28, 'Cashier');
+SQL> INSERT INTO Workers VALUES (63789357, 32133466, 'John', 42, 'Manager');
+SQL> INSERT INTO Workers VALUES (78934373, 12310846, 'Jane', 23, 'Stocking');
+SQL> INSERT INTO Workers VALUES (67893345, 40775460, 'Rick', 18, 'Stocking');
+SQL> INSERT INTO Workers VALUES (23987349, 37287273, 'Joe', 38, 'Manager');
+SQL> INSERT INTO Workers VALUES (34796932, 67787987, 'Holly', 21, 'Cashier');
+SQL> INSERT INTO Workers VALUES (87394572, 72727500, 'Nick', 16, 'Cashier');
+SQL> INSERT INTO Workers VALUES (82348791, 40775460, 'Adam', 35, 'Janitor');
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO Orders VALUES (27389239, 18923719, '19-APR-2012', 39739739, 'Purchase', 170);
+SQL> INSERT INTO Orders VALUES (63458973, 34796932, '12-MAR-2010', 67787987, 'Return', 150);
+SQL> INSERT INTO Orders VALUES (15728312, 87394572, '02-FEB-2007', 72727500, 'Purchase', 1020);
+SQL> INSERT INTO Orders VALUES (78956789, 18923719, '08-MAY-2011', 39739739, 'Reserve', 2000);
+SQL> INSERT INTO Orders VALUES (67728647, 34796932, '29-NOV-2012', 67787987, 'Return', 20);
+SQL> INSERT INTO Orders VALUES (36751237, 87394572, '10-DEC-2010', 72727500, 'Purchase', 5);
+SQL> INSERT INTO Orders VALUES (67347893, 87394572, '30-JAN-2007', 72727500, 'Purchase', 54);
+SQL> INSERT INTO Orders VALUES (92382762, 34796932, '07-SEP-2008', 67787987, 'Reserve', 24);
+SQL> INSERT INTO Orders VALUES (65748367, 18923719, '11-JUN-2009', 39739739, 'Purchase', 22);
+SQL> INSERT INTO Orders VALUES (63978367, 18923719, '21-JUL-2011', 39739739, 'Reserve', 6);
+SQL> INSERT INTO Orders VALUES (76934578, 87394572, '14-AUG-2012', 72727500, 'Purchase', 170);
+SQL> INSERT INTO Orders VALUES (37286237, 34796932, '22-OCT-2009', 67787987, 'Return', 450);
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO CD VALUES ('Toeachizown', 86999333, 22);
+SQL> INSERT INTO CD VALUES ('DJ Fizzy Fats Greatest Hits', 22765480, 13);
+SQL> INSERT INTO CD VALUES ('Slimi Island', 88102385, 11);
+SQL> INSERT INTO CD VALUES ('Flood', 55201823, 15);
+SQL> INSERT INTO CD VALUES ('800 Cherries', 78336924, 10);
+SQL> INSERT INTO CD VALUES ('Gymnopedies and Other Satie Classics', 67942066, 17);
+SQL> INSERT INTO CD VALUES ('Rose Quartz', 50238875, 19);
+SQL> INSERT INTO CD VALUES ('Jazz et Ragas', 30540054, 5);
+SQL> INSERT INTO CD VALUES ('Government Alpha', 61472084, 8);
+SQL> INSERT INTO CD VALUES ('Magic City', 72472358, 3);
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO CD_genre VALUES ('Toeachizown', 'Electronic');
+SQL> INSERT INTO CD_genre VALUES ('DJ Fizzy Fats Greatest Hits', 'Hip-hop');
+SQL> INSERT INTO CD_genre VALUES ('Slimi Island', 'Rock/Indie');
+SQL> INSERT INTO CD_genre VALUES ('Flood', 'Metal');
+SQL> INSERT INTO CD_genre VALUES ('800 Cherries', 'Pop');
+SQL> INSERT INTO CD_genre VALUES ('Gymnopedies and Other Satie Classics', 'Classical');
+SQL> INSERT INTO CD_genre VALUES ('Rose Quartz', 'Electronic');
+SQL> INSERT INTO CD_genre VALUES ('Jazz Et Ragas', 'World/Folk');
+SQL> INSERT INTO CD_genre VALUES ('Government Alpha', 'Other');
+SQL> INSERT INTO CD_genre VALUES ('Magic City', 'Jazz');
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO CD_artist VALUES ('Toeachizown', 'Dam-Funk');
+SQL> INSERT INTO CD_artist VALUES ('DJ Fizzy Fats Greatest Hits', 'DJ Fizzy Fats');
+SQL> INSERT INTO CD_artist VALUES ('Slimi Island', 'Pia Fraus');
+SQL> INSERT INTO CD_artist VALUES ('Flood', 'Boris');
+SQL> INSERT INTO CD_artist VALUES ('800 Cherries', '800 Cherries');
+SQL> INSERT INTO CD_artist VALUES ('Gymnopedies and Other Satie Classics', 'Erik Satei');
+SQL> INSERT INTO CD_artist VALUES ('Rose Quartz', 'luxury elite');
+SQL> INSERT INTO CD_artist VALUES ('Jazz Et Ragas', 'Ravi Shankar');
+SQL> INSERT INTO CD_artist VALUES ('Government Alpha', 'Government Alpha');
+SQL> INSERT INTO CD_artist VALUES ('Magic City', 'Sun Ra');
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO SellsA VALUES (46874343, 86753098);
+SQL> INSERT INTO SellsA VALUES (46874343, 98766665);
+SQL> INSERT INTO SellsA VALUES (46874343, 88740157);
+SQL> INSERT INTO SellsA VALUES (46874343, 88102385);
+SQL> INSERT INTO SellsA VALUES (46874343, 55201823);
+SQL> INSERT INTO SellsA VALUES (46874343, 78336924);
+SQL> INSERT INTO SellsA VALUES (46874343, 67942066);
+SQL> INSERT INTO SellsA VALUES (46874343, 59623748);
+SQL> INSERT INTO SellsA VALUES (46874343, 18919726);
+SQL> --
+SQL> INSERT INTO SellsA VALUES (39739739, 17652987);
+SQL> INSERT INTO SellsA VALUES (39739739, 86753098);
+SQL> INSERT INTO SellsA VALUES (39739739, 98766665);
+SQL> INSERT INTO SellsA VALUES (39739739, 88740157);
+SQL> INSERT INTO SellsA VALUES (39739739, 88102385);
+SQL> INSERT INTO SellsA VALUES (39739739, 55201823);
+SQL> INSERT INTO SellsA VALUES (39739739, 78336924);
+SQL> INSERT INTO SellsA VALUES (39739739, 67942066);
+SQL> INSERT INTO SellsA VALUES (39739739, 59623748);
+SQL> 
+SQL> INSERT INTO SellsA VALUES (39739739, 18919726);
+SQL> --
+SQL> INSERT INTO SellsA VALUES (37287273, 17652987);
+SQL> INSERT INTO SellsA VALUES (37287273, 86753098);
+SQL> INSERT INTO SellsA VALUES (37287273, 98766665);
+SQL> INSERT INTO SellsA VALUES (37287273, 88740157);
+SQL> INSERT INTO SellsA VALUES (37287273, 88102385);
+SQL> INSERT INTO SellsA VALUES (37287273, 55201823);
+SQL> INSERT INTO SellsA VALUES (37287273, 78336924);
+SQL> INSERT INTO SellsA VALUES (37287273, 67942066);
+SQL> INSERT INTO SellsA VALUES (37287273, 59623748);
+SQL> INSERT INTO SellsA VALUES (37287273, 18919726);
+SQL> --
+SQL> INSERT INTO SellsA VALUES (67787987, 17652987);
+SQL> INSERT INTO SellsA VALUES (67787987, 86753098);
+SQL> INSERT INTO SellsA VALUES (67787987, 98766665);
+SQL> INSERT INTO SellsA VALUES (67787987, 88740157);
+SQL> INSERT INTO SellsA VALUES (67787987, 88102385);
+SQL> INSERT INTO SellsA VALUES (67787987, 55201823);
+SQL> INSERT INTO SellsA VALUES (67787987, 78336924);
+SQL> INSERT INTO SellsA VALUES (67787987, 67942066);
+SQL> INSERT INTO SellsA VALUES (67787987, 59623748);
+SQL> INSERT INTO SellsA VALUES (67787987, 18919726);
+SQL> --
+SQL> INSERT INTO SellsA VALUES (12310846, 17652987);
+SQL> INSERT INTO SellsA VALUES (12310846, 86753098);
+SQL> INSERT INTO SellsA VALUES (12310846, 98766665);
+SQL> INSERT INTO SellsA VALUES (12310846, 88740157);
+SQL> INSERT INTO SellsA VALUES (12310846, 88102385);
+SQL> INSERT INTO SellsA VALUES (12310846, 55201823);
+SQL> INSERT INTO SellsA VALUES (12310846, 78336924);
+SQL> INSERT INTO SellsA VALUES (12310846, 67942066);
+SQL> INSERT INTO SellsA VALUES (12310846, 59623748);
+SQL> INSERT INTO SellsA VALUES (12310846, 18919726);
+SQL> --
+SQL> INSERT INTO SellsA VALUES (32133466, 17652987);
+SQL> INSERT INTO SellsA VALUES (32133466, 86753098);
+SQL> INSERT INTO SellsA VALUES (32133466, 98766665);
+SQL> INSERT INTO SellsA VALUES (32133466, 88740157);
+SQL> INSERT INTO SellsA VALUES (32133466, 88102385);
+SQL> INSERT INTO SellsA VALUES (32133466, 55201823);
+SQL> INSERT INTO SellsA VALUES (32133466, 78336924);
+SQL> INSERT INTO SellsA VALUES (32133466, 67942066);
+SQL> INSERT INTO SellsA VALUES (32133466, 59623748);
+SQL> INSERT INTO SellsA VALUES (32133466, 18919726);
+SQL> --
+SQL> INSERT INTO SellsA VALUES (40775460, 17652987);
+SQL> INSERT INTO SellsA VALUES (40775460, 86753098);
+SQL> INSERT INTO SellsA VALUES (40775460, 98766665);
+SQL> INSERT INTO SellsA VALUES (40775460, 88740157);
+SQL> INSERT INTO SellsA VALUES (40775460, 88102385);
+SQL> INSERT INTO SellsA VALUES (40775460, 55201823);
+SQL> INSERT INTO SellsA VALUES (40775460, 78336924);
+SQL> INSERT INTO SellsA VALUES (40775460, 67942066);
+SQL> INSERT INTO SellsA VALUES (40775460, 59623748);
+SQL> INSERT INTO SellsA VALUES (40775460, 18919726);
+SQL> --
+SQL> INSERT INTO SellsA VALUES (72727500, 17652987);
+SQL> INSERT INTO SellsA VALUES (72727500, 86753098);
+SQL> INSERT INTO SellsA VALUES (72727500, 98766665);
+SQL> INSERT INTO SellsA VALUES (72727500, 88740157);
+SQL> INSERT INTO SellsA VALUES (72727500, 88102385);
+SQL> INSERT INTO SellsA VALUES (72727500, 55201823);
+SQL> INSERT INTO SellsA VALUES (72727500, 78336924);
+SQL> INSERT INTO SellsA VALUES (72727500, 67942066);
+SQL> INSERT INTO SellsA VALUES (72727500, 59623748);
+SQL> INSERT INTO SellsA VALUES (72727500, 18919726);
+SQL> -- --------------------------------------------------------------------
+SQL> INSERT INTO Contains VALUES (17652987, 27389239, 2);
+SQL> INSERT INTO Contains VALUES (86753098, 63458973, 1);
+SQL> INSERT INTO Contains VALUES (98766665, 15728312, 3);
+SQL> INSERT INTO Contains VALUES (88740157, 78956789, 4);
+SQL> INSERT INTO Contains VALUES (88102385, 67728647, 2);
+SQL> INSERT INTO Contains VALUES (55201823, 36751237, 1);
+SQL> INSERT INTO Contains VALUES (78336924, 67347893, 3);
+SQL> INSERT INTO Contains VALUES (67942066, 92382762, 4);
+SQL> INSERT INTO Contains VALUES (59623748, 65748367, 1);
+SQL> INSERT INTO Contains VALUES (18919726, 63978367, 2);
+SQL> INSERT INTO Contains VALUES (17652987, 76934578, 2);
+SQL> INSERT INTO Contains VALUES (86753098, 37286237, 3);
+SQL> 
+SQL> SET FEEDBACK ON;
+SQL> COMMIT
+  2  
+SQL> -- Database instance
+SQL> SELECT * FROM Product;
+
+      PNUM      PRICE CONDITION       TYPE                                      
+---------- ---------- --------------- ---------------                           
+  17652987         85 New             Amp                                       
+  86753098        150 New             Guitar                                    
+  98766665        340 Used            Keyboard                                  
+  88740157        500 Refurbished     Guitar                                    
+  88102385         10 New             CD                                        
+  55201823          5 Used            CD                                        
+  78336924         18 New             CD                                        
+  67942066          6 Used            CD                                        
+  59623748         22 New             Merch                                     
+  18919726          3 New             Merch                                     
+
+10 rows selected.
+
+SQL> SELECT * FROM Store;
+
+      SNUM LOCATION                  HOURS                                      
+---------- -------------------- ----------                                      
+  46874343 Grand Rapids                 12                                      
+  39739739 Saint Clair Shores           10                                      
+  37287273 Saint Clair Shores           10                                      
+  67787987 Lansing                      11                                      
+  12310846 Grosse Pointe                 9                                      
+  32133466 Saint Clair Shores            2                                      
+  40775460 Grand Rapids                  8                                      
+  72727500 Detroit                      12                                      
+
+8 rows selected.
+
+SQL> SELECT * FROM Workers;
+
+      ENUM       SNUM NAME                   AGE JOBTITLE                       
+---------- ---------- --------------- ---------- ---------------                
+  10234190   46874343 Bob                     30 Janitor                        
+  18923719   39739739 Mary                    28 Cashier                        
+  63789357   32133466 John                    42 Manager                        
+  78934373   12310846 Jane                    23 Stocking                       
+  67893345   40775460 Rick                    18 Stocking                       
+  23987349   37287273 Joe                     38 Manager                        
+  34796932   67787987 Holly                   21 Cashier                        
+  87394572   72727500 Nick                    16 Cashier                        
+  82348791   40775460 Adam                    35 Janitor                        
+
+9 rows selected.
+
+SQL> SELECT * FROM Orders;
+
+  ORDERNUM       ENUM ODATE           SNUM TYPE                 TOTAL           
+---------- ---------- --------- ---------- --------------- ----------           
+  27389239   18923719 19-APR-12   39739739 Purchase               170           
+  63458973   34796932 12-MAR-10   67787987 Return                 150           
+  15728312   87394572 02-FEB-07   72727500 Purchase              1020           
+  78956789   18923719 08-MAY-11   39739739 Reserve               2000           
+  67728647   34796932 29-NOV-12   67787987 Return                  20           
+  36751237   87394572 10-DEC-10   72727500 Purchase                 5           
+  67347893   87394572 30-JAN-07   72727500 Purchase                54           
+  92382762   34796932 07-SEP-08   67787987 Reserve                 24           
+  65748367   18923719 11-JUN-09   39739739 Purchase                22           
+  63978367   18923719 21-JUL-11   39739739 Reserve                  6           
+  76934578   87394572 14-AUG-12   72727500 Purchase               170           
+
+  ORDERNUM       ENUM ODATE           SNUM TYPE                 TOTAL           
+---------- ---------- --------- ---------- --------------- ----------           
+  37286237   34796932 22-OCT-09   67787987 Return                 450           
+
+12 rows selected.
+
+SQL> SELECT * FROM CD;
+
+TITLE                                          PNUM   TRACKNUM                  
+---------------------------------------- ---------- ----------                  
+Toeachizown                                86999333         22                  
+DJ Fizzy Fats Greatest Hits                22765480         13                  
+Slimi Island                               88102385         11                  
+Flood                                      55201823         15                  
+800 Cherries                               78336924         10                  
+Gymnopedies and Other Satie Classics       67942066         17                  
+Rose Quartz                                50238875         19                  
+Jazz et Ragas                              30540054          5                  
+Government Alpha                           61472084          8                  
+Magic City                                 72472358          3                  
+
+10 rows selected.
+
+SQL> SELECT * FROM CD_genre;
+
+GENRE                                                                           
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+800 Cherries                                                                    
+Pop                                                                             
+                                                                                
+DJ Fizzy Fats Greatest Hits                                                     
+Hip-hop                                                                         
+                                                                                
+Flood                                                                           
+Metal                                                                           
+                                                                                
+
+GENRE                                                                           
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+Government Alpha                                                                
+Other                                                                           
+                                                                                
+Gymnopedies and Other Satie Classics                                            
+Classical                                                                       
+                                                                                
+Jazz Et Ragas                                                                   
+World/Folk                                                                      
+                                                                                
+
+GENRE                                                                           
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+Magic City                                                                      
+Jazz                                                                            
+                                                                                
+Rose Quartz                                                                     
+Electronic                                                                      
+                                                                                
+Slimi Island                                                                    
+Rock/Indie                                                                      
+                                                                                
+
+GENRE                                                                           
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+Toeachizown                                                                     
+Electronic                                                                      
+                                                                                
+
+10 rows selected.
+
+SQL> SELECT * FROM CD_artist;
+
+ARTIST                                                                          
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+800 Cherries                                                                    
+800 Cherries                                                                    
+                                                                                
+DJ Fizzy Fats Greatest Hits                                                     
+DJ Fizzy Fats                                                                   
+                                                                                
+Flood                                                                           
+Boris                                                                           
+                                                                                
+
+ARTIST                                                                          
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+Government Alpha                                                                
+Government Alpha                                                                
+                                                                                
+Gymnopedies and Other Satie Classics                                            
+Erik Satei                                                                      
+                                                                                
+Jazz Et Ragas                                                                   
+Ravi Shankar                                                                    
+                                                                                
+
+ARTIST                                                                          
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+Magic City                                                                      
+Sun Ra                                                                          
+                                                                                
+Rose Quartz                                                                     
+luxury elite                                                                    
+                                                                                
+Slimi Island                                                                    
+Pia Fraus                                                                       
+                                                                                
+
+ARTIST                                                                          
+----------------------------------------                                        
+TITLE                                                                           
+--------------------------------------------------                              
+Toeachizown                                                                     
+Dam-Funk                                                                        
+                                                                                
+
+10 rows selected.
+
+SQL> SELECT * FROM SellsA;
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  12310846   17652987                                                           
+  12310846   18919726                                                           
+  12310846   55201823                                                           
+  12310846   59623748                                                           
+  12310846   67942066                                                           
+  12310846   78336924                                                           
+  12310846   86753098                                                           
+  12310846   88102385                                                           
+  12310846   88740157                                                           
+  12310846   98766665                                                           
+  32133466   17652987                                                           
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  32133466   18919726                                                           
+  32133466   55201823                                                           
+  32133466   59623748                                                           
+  32133466   67942066                                                           
+  32133466   78336924                                                           
+  32133466   86753098                                                           
+  32133466   88102385                                                           
+  32133466   88740157                                                           
+  32133466   98766665                                                           
+  37287273   17652987                                                           
+  37287273   18919726                                                           
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  37287273   55201823                                                           
+  37287273   59623748                                                           
+  37287273   67942066                                                           
+  37287273   78336924                                                           
+  37287273   86753098                                                           
+  37287273   88102385                                                           
+  37287273   88740157                                                           
+  37287273   98766665                                                           
+  39739739   17652987                                                           
+  39739739   18919726                                                           
+  39739739   55201823                                                           
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  39739739   59623748                                                           
+  39739739   67942066                                                           
+  39739739   78336924                                                           
+  39739739   86753098                                                           
+  39739739   88102385                                                           
+  39739739   88740157                                                           
+  39739739   98766665                                                           
+  40775460   17652987                                                           
+  40775460   18919726                                                           
+  40775460   55201823                                                           
+  40775460   59623748                                                           
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  40775460   67942066                                                           
+  40775460   78336924                                                           
+  40775460   86753098                                                           
+  40775460   88102385                                                           
+  40775460   88740157                                                           
+  40775460   98766665                                                           
+  46874343   18919726                                                           
+  46874343   55201823                                                           
+  46874343   59623748                                                           
+  46874343   67942066                                                           
+  46874343   78336924                                                           
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  46874343   86753098                                                           
+  46874343   88102385                                                           
+  46874343   88740157                                                           
+  46874343   98766665                                                           
+  67787987   17652987                                                           
+  67787987   18919726                                                           
+  67787987   55201823                                                           
+  67787987   59623748                                                           
+  67787987   67942066                                                           
+  67787987   78336924                                                           
+  67787987   86753098                                                           
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  67787987   88102385                                                           
+  67787987   88740157                                                           
+  67787987   98766665                                                           
+  72727500   17652987                                                           
+  72727500   18919726                                                           
+  72727500   55201823                                                           
+  72727500   59623748                                                           
+  72727500   67942066                                                           
+  72727500   78336924                                                           
+  72727500   86753098                                                           
+  72727500   88102385                                                           
+
+      SNUM       PNUM                                                           
+---------- ----------                                                           
+  72727500   88740157                                                           
+  72727500   98766665                                                           
+
+79 rows selected.
+
+SQL> SELECT * FROM Contains;
+
+      PNUM       ONUM   QUANTITY                                                
+---------- ---------- ----------                                                
+  17652987   27389239          2                                                
+  86753098   63458973          1                                                
+  98766665   15728312          3                                                
+  88740157   78956789          4                                                
+  88102385   67728647          2                                                
+  55201823   36751237          1                                                
+  78336924   67347893          3                                                
+  67942066   92382762          4                                                
+  59623748   65748367          1                                                
+  18919726   63978367          2                                                
+  17652987   76934578          2                                                
+
+      PNUM       ONUM   QUANTITY                                                
+---------- ---------- ----------                                                
+  86753098   37286237          3                                                
+
+12 rows selected.
+
+SQL> 
+SQL> -- --------------------------------------------------------------------
+SQL> -- Queries
+SQL> -- --------------------------------------------------------------------
+SQL> 
+SQL> -- This is a query that joins 5 tables. The purpose is to find every order which contains only a single item.
+SQL> -- From there we want to find the number of that order, the product that was sold in the order, the employee
+SQL> -- who processed that order, the store where that order was made, and the quantity of items in the order.
+SQL> --
+SQL> -- Q1 - 4 Join
+SQL> SELECT o.OrderNum, p.pNum, s.sNum, w.eNum, c.Quantity
+  2  FROM Product p, Store s, Workers w, Orders o, Contains c
+  3  WHERE p.price = o.Total AND
+  4  s.sNum = w.sNum AND
+  5  s.sNum = o.SNum AND
+  6  w.eNum = o.Enum AND
+  7  c.pNum = p.pNum AND
+  8  c.oNum = o.OrderNum AND
+  9  c.Quantity = 1
+ 10  ORDER BY o.OrderNum;
+
+  ORDERNUM       PNUM       SNUM       ENUM   QUANTITY                          
+---------- ---------- ---------- ---------- ----------                          
+  36751237   55201823   72727500   87394572          1                          
+  63458973   86753098   67787987   34796932          1                          
+  65748367   59623748   39739739   18923719          1                          
+
+3 rows selected.
+
+SQL> 
+SQL> -- This is a self-join where we check to see if two different employees have the
+SQL> -- same job title, and from there we collect both employee's numbers, names, and
+SQL> -- job titles.
+SQL> --
+SQL> -- Q2 - Self-join
+SQL> SELECT DISTINCT w1.eNum, w1.Name, w1.JobTitle, w2.eNum, w2.Name, w2.JobTitle
+  2  FROM Workers w1, Workers w2
+  3  WHERE w1.JobTitle = w2.JobTitle AND
+  4  w1.eNum < w2.eNum;
+
+      ENUM NAME            JOBTITLE              ENUM NAME                      
+---------- --------------- --------------- ---------- ---------------           
+JOBTITLE                                                                        
+---------------                                                                 
+  23987349 Joe             Manager           63789357 John                      
+Manager                                                                         
+                                                                                
+  67893345 Rick            Stocking          78934373 Jane                      
+Stocking                                                                        
+                                                                                
+  18923719 Mary            Cashier           34796932 Holly                     
+Cashier                                                                         
+                                                                                
+
+      ENUM NAME            JOBTITLE              ENUM NAME                      
+---------- --------------- --------------- ---------- ---------------           
+JOBTITLE                                                                        
+---------------                                                                 
+  34796932 Holly           Cashier           87394572 Nick                      
+Cashier                                                                         
+                                                                                
+  18923719 Mary            Cashier           87394572 Nick                      
+Cashier                                                                         
+                                                                                
+  10234190 Bob             Janitor           82348791 Adam                      
+Janitor                                                                         
+                                                                                
+
+6 rows selected.
+
+SQL> 
+SQL> 
+SQL> -- This is a correlated subquery that also implements the MAX function.
+SQL> -- It's goal is to find the most expensive product within each product type,
+SQL> -- and print that product's number, price, condition, and type.
+SQL> --
+SQL> -- Q3 - Correlated subquery
+SQL> SELECT p1.pNum, p1.Price, p1.Condition, p1.Type
+  2  FROM   Product p1
+  3  WHERE  p1.Price =
+  4  	    (SELECT MAX(p2.price)
+  5  	     FROM   Product p2
+  6  	     WHERE  p1.Type = p2.Type)
+  7  ORDER BY p1.price;
+
+      PNUM      PRICE CONDITION       TYPE                                      
+---------- ---------- --------------- ---------------                           
+  78336924         18 New             CD                                        
+  59623748         22 New             Merch                                     
+  17652987         85 New             Amp                                       
+  98766665        340 Used            Keyboard                                  
+  88740157        500 Refurbished     Guitar                                    
+
+5 rows selected.
+
+SQL> 
+SQL> 
+SQL> -- This query implements DIVISION and MINUS.
+SQL> -- It finds the store number and store location of every store in Grand Rapids
+SQL> -- that sells an Amp.
+SQL> --
+SQL> -- Q4 - Division and Minus
+SQL> SELECT s.sNum, s.Location
+  2  FROM   Store s
+  3  WHERE  s.Location = 'Grand Rapids' AND NOT EXISTS (
+  4  	    (SELECT p.pNum
+  5  	     FROM   Product p
+  6  	     WHERE  p.Type = 'Amp')
+  7  	    MINUS
+  8  	    (SELECT sa.pNum
+  9  	     FROM SellsA sa
+ 10  	     WHERE sa.sNum = s.sNum))
+ 11  ORDER BY s.Location;
+
+      SNUM LOCATION                                                             
+---------- --------------------                                                 
+  40775460 Grand Rapids                                                         
+
+1 row selected.
+
+SQL> 
+SQL> -- This non-correlated sub query displays every worker who doesn't work in
+SQL> -- Lansing and shows their worker number, name, and the store that they work at.
+SQL> --
+SQL> -- Q5 - non-correlated subquery
+SQL> SELECT W.eNum, W.Name, W.sNum
+  2  FROM   Workers W
+  3  WHERE  W.eNum NOT IN
+  4  	    (SELECT W.eNum
+  5  	     FROM   Workers W, Store S
+  6  	     WHERE  W.sNum = S.sNum AND S.Location = 'Lansing')
+  7  ORDER BY W.Name;
+
+      ENUM NAME                  SNUM                                           
+---------- --------------- ----------                                           
+  82348791 Adam              40775460                                           
+  10234190 Bob               46874343                                           
+  78934373 Jane              12310846                                           
+  23987349 Joe               37287273                                           
+  63789357 John              32133466                                           
+  18923719 Mary              39739739                                           
+  87394572 Nick              72727500                                           
+  67893345 Rick              40775460                                           
+
+8 rows selected.
+
+SQL> 
+SQL> -- This query has GROUP BY, HAVING, and ORDER BY. It finds every store that
+SQL> -- has more than 1 employee working at it, and displays the store's number,
+SQL> -- location, and the number of employees that work at it.
+SQL> --
+SQL> -- Q6 - GROUP BY, HAVING, AND ORDER BY
+SQL> SELECT s.sNum, s.Location, COUNT(*)
+  2  FROM   Store s, Workers w
+  3  WHERE  w.sNum = s.sNum
+  4  GROUP BY s.sNum, s.Location
+  5  HAVING COUNT(*) > 1
+  6  ORDER BY s.sNum;
+
+      SNUM LOCATION               COUNT(*)                                      
+---------- -------------------- ----------                                      
+  40775460 Grand Rapids                  2                                      
+
+1 row selected.
+
+SQL> 
+SQL> 
+SQL> -- This is an OUTER JOIN. It displays the employee number, name, order number,
+SQL> -- and order date. It's purpose is to find every employee that has made an order.
+SQL> --
+SQL> -- Q7 - OUTER JOIN
+SQL> SELECT W.eNum, W.name, O.OrderNum ,O.oDate
+  2  FROM Workers W LEFT OUTER JOIN Orders O ON W.eNum = O.eNum
+  3  
+SQL> 
+SQL> 
+SQL> -- --------------------------------------------------------------------
+SQL> -- Broken Cases for Constraints
+SQL> -- --------------------------------------------------------------------
+SQL> 
+SQL> -- Testing: pIC1
+SQL> INSERT INTO Product VALUES (null, 85, 'New', 'Amp');
+INSERT INTO Product VALUES (null, 85, 'New', 'Amp')
+                            *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."PRODUCT"."PNUM") 
+
+
+SQL> -- Testing: pIC2
+SQL> INSERT INTO Product VALUES (27652987, 85, 'Broke', 'Amp');
+INSERT INTO Product VALUES (27652987, 85, 'Broke', 'Amp')
+*
+ERROR at line 1:
+ORA-02290: check constraint (STOUTT.PIC2) violated 
+
+
+SQL> 
+SQL> -- Testing: sIC1
+SQL> INSERT INTO Store VALUES (null, 'Grand Rapids', 12);
+INSERT INTO Store VALUES (null, 'Grand Rapids', 12)
+                          *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."STORE"."SNUM") 
+
+
+SQL> -- Testing: sIC2
+SQL> INSERT INTO Store VALUES (56874343, 'Grand Rapids', 25);
+INSERT INTO Store VALUES (56874343, 'Grand Rapids', 25)
+*
+ERROR at line 1:
+ORA-02290: check constraint (STOUTT.SIC2) violated 
+
+
+SQL> 
+SQL> -- Testing: wIC1
+SQL> INSERT INTO Workers VALUES (null, 46874343,'Bob',30,'Janitor');
+INSERT INTO Workers VALUES (null, 46874343,'Bob',30,'Janitor')
+                            *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."WORKERS"."ENUM") 
+
+
+SQL> -- Testing: wIC2
+SQL> INSERT INTO Workers VALUES (30234190, 1,'Bob',30,'Janitor');
+INSERT INTO Workers VALUES (30234190, 1,'Bob',30,'Janitor')
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STOUTT.WIC2) violated - parent key not found 
+
+
+SQL> -- Testing: wIC3
+SQL> INSERT INTO Workers VALUES (40234190, 46874343,'Bob',16,'Manager');
+INSERT INTO Workers VALUES (40234190, 46874343,'Bob',16,'Manager')
+*
+ERROR at line 1:
+ORA-02290: check constraint (STOUTT.WIC3) violated 
+
+
+SQL> 
+SQL> -- Testing: oIC1
+SQL> INSERT INTO Orders VALUES (null, 18923719, '19-APR-2012', 39739739, 'Purchase', 170);
+INSERT INTO Orders VALUES (null, 18923719, '19-APR-2012', 39739739, 'Purchase', 170)
+                           *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."ORDERS"."ORDERNUM") 
+
+
+SQL> -- Testing: oIC2
+SQL> INSERT INTO Orders VALUES (37389239, 1, '19-APR-2012', 39739739, 'Purchase', 170);
+INSERT INTO Orders VALUES (37389239, 1, '19-APR-2012', 39739739, 'Purchase', 170)
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STOUTT.OIC2) violated - parent key not found 
+
+
+SQL> -- Testing: oIC3
+SQL> INSERT INTO Orders VALUES (47389239, 18923719, '19-APR-2012', 3, 'Purchase', 170);
+INSERT INTO Orders VALUES (47389239, 18923719, '19-APR-2012', 3, 'Purchase', 170)
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (STOUTT.OIC3) violated - parent key not found 
+
+
+SQL> 
+SQL> 
+SQL> -- Testing: cIC1
+SQL> INSERT INTO CD VALUES (null, 66999333, 22);
+INSERT INTO CD VALUES (null, 66999333, 22)
+                       *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CD"."TITLE") 
+
+
+SQL> -- Testing: cIC1
+SQL> INSERT INTO CD VALUES ('Roeachizown', null, 22);
+INSERT INTO CD VALUES ('Roeachizown', null, 22)
+                                      *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CD"."PNUM") 
+
+
+SQL> 
+SQL> 
+SQL> -- Testing: gIC1
+SQL> INSERT INTO CD_genre VALUES (null, 'Plectronic');
+INSERT INTO CD_genre VALUES (null, 'Plectronic')
+                             *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CD_GENRE"."GENRE") 
+
+
+SQL> -- Testing: gIC1
+SQL> INSERT INTO CD_genre VALUES ('Xoeachizown', null);
+INSERT INTO CD_genre VALUES ('Xoeachizown', null)
+                                            *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CD_GENRE"."TITLE") 
+
+
+SQL> 
+SQL> -- Testing: aIC1
+SQL> INSERT INTO CD_artist VALUES (null, 'Ram-Funk');
+INSERT INTO CD_artist VALUES (null, 'Ram-Funk')
+                              *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CD_ARTIST"."ARTIST") 
+
+
+SQL> -- Testing: aIC1
+SQL> INSERT INTO CD_artist VALUES ('Goeachizown', null);
+INSERT INTO CD_artist VALUES ('Goeachizown', null)
+                                             *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CD_ARTIST"."TITLE") 
+
+
+SQL> 
+SQL> -- Testing: saIC1
+SQL> INSERT INTO SellsA VALUES (null, 37652987);
+INSERT INTO SellsA VALUES (null, 37652987)
+                           *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."SELLSA"."SNUM") 
+
+
+SQL> -- Testing: saIC1
+SQL> INSERT INTO SellsA VALUES (56874343, null);
+INSERT INTO SellsA VALUES (56874343, null)
+                                     *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."SELLSA"."PNUM") 
+
+
+SQL> 
+SQL> -- Testing: coIC1
+SQL> INSERT INTO Contains VALUES (null, 37389239, 2);
+INSERT INTO Contains VALUES (null, 37389239, 2)
+                             *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CONTAINS"."PNUM") 
+
+
+SQL> -- Testing: coIC1
+SQL> INSERT INTO Contains VALUES (27652987, null, 2);
+INSERT INTO Contains VALUES (27652987, null, 2)
+                                       *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("STOUTT"."CONTAINS"."ONUM") 
+
+
+SQL> -- Testing: coIC2
+SQL> INSERT INTO Contains VALUES (37652987, 67389239, 6);
+INSERT INTO Contains VALUES (37652987, 67389239, 6)
+*
+ERROR at line 1:
+ORA-02290: check constraint (STOUTT.COIC2) violated 
+
+
+SQL> -- --------------------------------------------------------------------
+SQL> -- Now, if no violations were detected, COMMIT all the commands in this file
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> SPOOL OFF
